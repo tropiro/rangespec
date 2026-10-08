@@ -2,7 +2,7 @@
 
 All notable changes to RangeSpec are recorded here.
 
-## 0.1.0 — unreleased
+## 0.1.0 — 2026-10-08
 
 - Added the version 0.1 authorization manifest schema.
 - Added bounded duplicate-safe JSON input.
