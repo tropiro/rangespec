@@ -1,0 +1,456 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tropiro.com/schemas/rangespec/v0.1.json",
+  "title": "RangeSpec authorization manifest",
+  "description": "A bounded authorization and evidence manifest for a controlled security range.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "manifest_id",
+    "title",
+    "status",
+    "validity",
+    "owners",
+    "approvals",
+    "targets",
+    "allowed_actions",
+    "prohibited_actions",
+    "safety",
+    "recovery",
+    "evidence",
+    "execution"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "0.1"
+    },
+    "manifest_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+      "minLength": 3,
+      "maxLength": 80
+    },
+    "title": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 160
+    },
+    "status": {
+      "enum": ["draft", "approved", "suspended", "closed"]
+    },
+    "validity": {
+      "$ref": "#/$defs/validity"
+    },
+    "owners": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 20,
+      "items": {
+        "$ref": "#/$defs/person_role"
+      }
+    },
+    "approvals": {
+      "type": "array",
+      "maxItems": 20,
+      "items": {
+        "$ref": "#/$defs/approval"
+      }
+    },
+    "targets": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 100,
+      "items": {
+        "$ref": "#/$defs/target"
+      }
+    },
+    "allowed_actions": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 500,
+      "items": {
+        "$ref": "#/$defs/action"
+      }
+    },
+    "prohibited_actions": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 100,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 240
+      }
+    },
+    "safety": {
+      "$ref": "#/$defs/safety"
+    },
+    "recovery": {
+      "$ref": "#/$defs/recovery"
+    },
+    "evidence": {
+      "$ref": "#/$defs/evidence"
+    },
+    "execution": {
+      "$ref": "#/$defs/execution"
+    }
+  },
+  "$defs": {
+    "nonempty_text": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "identifier": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+      "minLength": 2,
+      "maxLength": 80
+    },
+    "validity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["not_before", "not_after"],
+      "properties": {
+        "not_before": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "not_after": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "person_role": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "role", "organization"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 120
+        },
+        "role": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 120
+        },
+        "organization": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 160
+        }
+      }
+    },
+    "approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["approval_id", "approved_by", "role", "decision", "approved_at"],
+      "properties": {
+        "approval_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "approved_by": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 120
+        },
+        "role": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 120
+        },
+        "decision": {
+          "enum": ["approved", "rejected", "revoked"]
+        },
+        "approved_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "port": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["transport", "port"],
+      "properties": {
+        "transport": {
+          "enum": ["tcp", "udp"]
+        },
+        "port": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535
+        }
+      }
+    },
+    "identifiers": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["firmware_version"],
+      "properties": {
+        "firmware_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "serial_number": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "image_sha256": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "target_id",
+        "kind",
+        "description",
+        "identifiers",
+        "addresses",
+        "ports",
+        "protocols"
+      ],
+      "properties": {
+        "target_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "kind": {
+          "enum": ["device", "image", "service", "simulator"]
+        },
+        "description": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 240
+        },
+        "identifiers": {
+          "$ref": "#/$defs/identifiers"
+        },
+        "addresses": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 64
+          }
+        },
+        "ports": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 64,
+          "items": {
+            "$ref": "#/$defs/port"
+          }
+        },
+        "protocols": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9+._-]*$",
+            "maxLength": 64
+          }
+        }
+      }
+    },
+    "rate_limit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["requests", "per_seconds"],
+      "properties": {
+        "requests": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "per_seconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 86400
+        }
+      }
+    },
+    "action": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "action_id",
+        "target_id",
+        "effect",
+        "protocol",
+        "description",
+        "rate_limit",
+        "maximum_impact"
+      ],
+      "properties": {
+        "action_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "target_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "effect": {
+          "enum": ["observe", "read", "write", "configure", "update", "reboot"]
+        },
+        "protocol": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9+._-]*$",
+          "maxLength": 64
+        },
+        "description": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 320
+        },
+        "rate_limit": {
+          "$ref": "#/$defs/rate_limit"
+        },
+        "maximum_impact": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 320
+        }
+      }
+    },
+    "safety": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["safe_state", "maximum_impact", "stop_conditions", "kill_switch"],
+      "properties": {
+        "safe_state": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 500
+        },
+        "maximum_impact": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 500
+        },
+        "stop_conditions": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 100,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 320
+          }
+        },
+        "kill_switch": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 500
+        }
+      }
+    },
+    "recovery": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["baseline_sha256", "procedure", "last_verified_at", "verified_by"],
+      "properties": {
+        "baseline_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "procedure": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 100,
+          "items": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 500
+          }
+        },
+        "last_verified_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "verified_by": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 120
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["classification", "retention_days", "capture", "redact_paths"],
+      "properties": {
+        "classification": {
+          "enum": ["public", "internal", "vendor-confidential", "restricted"]
+        },
+        "retention_days": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3650
+        },
+        "capture": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 20,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "approvals",
+              "commands",
+              "device-logs",
+              "host-logs",
+              "network",
+              "screenshots",
+              "simulator-state"
+            ]
+          }
+        },
+        "redact_paths": {
+          "type": "array",
+          "maxItems": 100,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^/(?:[^/~]|~[01])+(?:/(?:[^/~]|~[01])+)*$",
+            "maxLength": 500
+          }
+        }
+      }
+    },
+    "execution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["network_policy", "internet_egress", "max_duration_seconds"],
+      "properties": {
+        "network_policy": {
+          "const": "default-deny"
+        },
+        "internet_egress": {
+          "const": false
+        },
+        "max_duration_seconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 86400
+        }
+      }
+    }
+  }
+}

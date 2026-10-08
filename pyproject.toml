@@ -1,0 +1,82 @@
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "tropiro-rangespec"
+version = "0.1.0"
+description = "Offline-first authorization and scope manifests for controlled security ranges."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "Apache-2.0"
+authors = [
+  { name = "Christopher Yanez", email = "founder@tropiro.com" },
+]
+keywords = [
+  "authorization",
+  "cyber-range",
+  "industrial-security",
+  "security-testing",
+  "scope",
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: Apache Software License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Security",
+]
+dependencies = [
+  "jsonschema>=4.25.1,<5",
+]
+
+[project.optional-dependencies]
+anthropic = [
+  "anthropic==1.8.0",
+]
+
+[dependency-groups]
+dev = [
+  "anthropic==1.8.0",
+  "mypy>=1.18,<2",
+  "pytest>=8.4,<9",
+  "ruff>=0.13,<0.14",
+  "types-jsonschema>=4.25,<5",
+]
+
+[project.scripts]
+rangespec = "rangespec.cli:main"
+
+[project.urls]
+Homepage = "https://tropiro.com"
+Issues = "https://github.com/tropiro/rangespec/issues"
+Repository = "https://github.com/tropiro/rangespec"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/rangespec"]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM", "RUF"]
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+warn_unreachable = true
+packages = ["rangespec"]
+
+[tool.uv]
+package = true

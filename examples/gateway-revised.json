@@ -1,0 +1,143 @@
+{
+  "allowed_actions": [
+    {
+      "action_id": "read-gateway-status",
+      "description": "Read the simulated gateway health endpoint.",
+      "effect": "read",
+      "maximum_impact": "Read-only response from the simulated management service.",
+      "protocol": "https",
+      "rate_limit": {
+        "per_seconds": 60,
+        "requests": 20
+      },
+      "target_id": "gateway-sim"
+    },
+    {
+      "action_id": "write-simulated-register",
+      "description": "Write one bounded training value to simulator register 10.",
+      "effect": "write",
+      "maximum_impact": "One simulated indicator changes within the range 0 through 50.",
+      "protocol": "modbus-tcp",
+      "rate_limit": {
+        "per_seconds": 60,
+        "requests": 3
+      },
+      "target_id": "field-sim"
+    }
+  ],
+  "approvals": [
+    {
+      "approval_id": "example-owner-approval",
+      "approved_at": "2026-10-08T18:30:00Z",
+      "approved_by": "Different Private Reviewer",
+      "decision": "approved",
+      "role": "Training target owner"
+    }
+  ],
+  "evidence": {
+    "capture": [
+      "approvals",
+      "commands",
+      "device-logs",
+      "network",
+      "simulator-state"
+    ],
+    "classification": "public",
+    "redact_paths": [
+      "/approvals/0/approved_by",
+      "/owners/0/name"
+    ],
+    "retention_days": 90
+  },
+  "execution": {
+    "internet_egress": false,
+    "max_duration_seconds": 2700,
+    "network_policy": "default-deny"
+  },
+  "manifest_id": "gateway-training-001",
+  "owners": [
+    {
+      "name": "Different Private Reviewer",
+      "organization": "Example Lab",
+      "role": "Training target owner"
+    }
+  ],
+  "prohibited_actions": [
+    "No traffic to an address not listed in this manifest.",
+    "No public Internet or vendor cloud access.",
+    "No denial-of-service, firmware modification, or real actuator connection."
+  ],
+  "recovery": {
+    "baseline_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "last_verified_at": "2026-10-08T17:30:00Z",
+    "procedure": [
+      "Stop the disposable test client.",
+      "Restore the simulator fixture from the recorded baseline.",
+      "Verify gateway health and simulator register 10 equals zero."
+    ],
+    "verified_by": "Example Recovery Reviewer"
+  },
+  "safety": {
+    "kill_switch": "Disconnect both simulated target interfaces and stop the disposable client.",
+    "maximum_impact": "Temporary change to one bounded value in a software-only simulator.",
+    "safe_state": "Simulator register 10 equals zero and no active test client is connected.",
+    "stop_conditions": [
+      "Any packet addresses a target not listed in this manifest.",
+      "The simulated value leaves the range 0 through 50.",
+      "Required evidence capture stops."
+    ]
+  },
+  "schema_version": "0.1",
+  "status": "approved",
+  "targets": [
+    {
+      "addresses": [
+        "192.0.2.10/32"
+      ],
+      "description": "Software-only industrial gateway training target.",
+      "identifiers": {
+        "firmware_version": "training-1.0.0",
+        "image_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+        "serial_number": "SIM-GATEWAY-001"
+      },
+      "kind": "simulator",
+      "ports": [
+        {
+          "port": 443,
+          "transport": "tcp"
+        }
+      ],
+      "protocols": [
+        "https"
+      ],
+      "target_id": "gateway-sim"
+    },
+    {
+      "addresses": [
+        "192.0.2.20/32"
+      ],
+      "description": "Deterministic field-value simulator with no physical output.",
+      "identifiers": {
+        "firmware_version": "training-1.0.0",
+        "image_sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+        "serial_number": "SIM-FIELD-001"
+      },
+      "kind": "simulator",
+      "ports": [
+        {
+          "port": 502,
+          "transport": "tcp"
+        }
+      ],
+      "protocols": [
+        "modbus-tcp"
+      ],
+      "target_id": "field-sim"
+    }
+  ],
+  "title": "Simulated gateway bounded-write training scenario",
+  "validity": {
+    "not_after": "2026-10-08T22:00:00Z",
+    "not_before": "2026-10-08T18:00:00Z"
+  }
+}
