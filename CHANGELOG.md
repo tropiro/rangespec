@@ -2,6 +2,11 @@
 
 All notable changes to RangeSpec are recorded here.
 
+## 0.2.1 — 2026-10-20
+
+- Removed the verification script's undeclared dependency on ripgrep so the
+  complete gate runs on a clean GitHub-hosted runner.
+
 ## 0.2.0 — 2026-10-20
 
 - Added a reusable GitHub Action for repository-local manifest validation.

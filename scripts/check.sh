@@ -44,8 +44,8 @@ verify_github_action() {
 
   actual="$(sed -n 's/^fingerprint=//p' "$action_output")"
   [[ "$actual" == "$expected" ]] || return 1
-  rg -Fq "VALID execution-ready" "$action_log" || return 1
-  rg -Fq "RANGESPEC_FINGERPRINT: $expected" "$action_log" || return 1
+  grep -Fq "VALID execution-ready" "$action_log" || return 1
+  grep -Fq "RANGESPEC_FINGERPRINT: $expected" "$action_log" || return 1
 
   escape_workspace="$build_directory/escape-workspace"
   escape_log="$build_directory/escape-log"
@@ -60,14 +60,14 @@ verify_github_action() {
       ./scripts/github-action.sh >"$escape_log" 2>&1; then
     return 1
   fi
-  rg -Fq "must remain inside" "$escape_log"
+  grep -Fq "must remain inside" "$escape_log"
 }
 
 verify_action_metadata() {
   bash -n scripts/github-action.sh || return 1
-  rg -Fq "using: composite" action.yml || return 1
-  rg -Fq "permissions:" examples/workflows/rangespec.yml || return 1
-  rg -Fq "contents: read" examples/workflows/rangespec.yml
+  grep -Fq "using: composite" action.yml || return 1
+  grep -Fq "permissions:" examples/workflows/rangespec.yml || return 1
+  grep -Fq "contents: read" examples/workflows/rangespec.yml
 }
 
 verify_built_package() {

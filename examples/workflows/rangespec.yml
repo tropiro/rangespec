@@ -20,7 +20,7 @@ jobs:
 
       - name: Validate declared scope
         id: rangespec
-        uses: tropiro/rangespec@v0.2.0
+        uses: tropiro/rangespec@v0.2.1
         with:
           manifest: range/authorized-test.json
           execution-ready: "true"
