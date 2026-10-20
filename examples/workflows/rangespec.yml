@@ -1,0 +1,29 @@
+name: Validate security range scope
+
+on:
+  pull_request:
+    paths:
+      - "range/**.json"
+  push:
+    paths:
+      - "range/**.json"
+
+permissions:
+  contents: read
+
+jobs:
+  rangespec:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Validate declared scope
+        id: rangespec
+        uses: tropiro/rangespec@v0.2.0
+        with:
+          manifest: range/authorized-test.json
+          execution-ready: "true"
+
+      - name: Record manifest fingerprint
+        run: echo "Validated ${{ steps.rangespec.outputs.fingerprint }}"

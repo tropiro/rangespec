@@ -2,6 +2,14 @@
 
 All notable changes to RangeSpec are recorded here.
 
+## 0.2.0 — 2026-10-20
+
+- Added a reusable GitHub Action for repository-local manifest validation.
+- Added execution-readiness and fixed-time inputs plus a canonical fingerprint
+  output for downstream evidence steps.
+- Added repository-boundary checks and a local action-entrypoint verification.
+- Added a complete least-privilege consumer workflow.
+
 ## 0.1.0 — 2026-10-08
 
 - Added the version 0.1 authorization manifest schema.

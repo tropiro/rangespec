@@ -1,0 +1,44 @@
+name: RangeSpec validation
+description: Validate an authorization and scope manifest before a security-range job runs.
+author: Tropiro
+
+branding:
+  icon: shield
+  color: green
+
+inputs:
+  manifest:
+    description: Repository-relative path to the RangeSpec JSON manifest.
+    required: true
+  execution-ready:
+    description: Require approval, evidence, recovery, target, and active time-window checks.
+    required: false
+    default: "false"
+  at:
+    description: Optional ISO 8601 timestamp used for reproducible readiness evaluation.
+    required: false
+    default: ""
+
+outputs:
+  fingerprint:
+    description: SHA-256 fingerprint of the validated canonical manifest.
+    value: ${{ steps.validate.outputs.fingerprint }}
+
+runs:
+  using: composite
+  steps:
+    - name: Install uv
+      uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+      with:
+        version: "0.12.23"
+        enable-cache: true
+        working-directory: ${{ github.action_path }}
+
+    - name: Validate manifest
+      id: validate
+      shell: bash
+      env:
+        RANGESPEC_INPUT_MANIFEST: ${{ inputs.manifest }}
+        RANGESPEC_INPUT_EXECUTION_READY: ${{ inputs.execution-ready }}
+        RANGESPEC_INPUT_AT: ${{ inputs.at }}
+      run: "$GITHUB_ACTION_PATH/scripts/github-action.sh"

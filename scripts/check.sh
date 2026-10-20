@@ -25,6 +25,51 @@ verify_fingerprint() {
   [[ "$actual" == "$expected" ]]
 }
 
+verify_github_action() {
+  local action_output action_log action_workspace escape_log escape_workspace expected actual
+  action_output="$build_directory/action-output"
+  action_log="$build_directory/action-log"
+  action_workspace="$build_directory/action-workspace"
+  expected="$(tr -d '[:space:]' < examples/gateway-valid.sha256)"
+  mkdir -p "$action_workspace/range"
+  cp examples/gateway-valid.json "$action_workspace/range/authorized-test.json"
+
+  GITHUB_ACTION_PATH="$project_root" \
+  GITHUB_WORKSPACE="$action_workspace" \
+  GITHUB_OUTPUT="$action_output" \
+  RANGESPEC_INPUT_MANIFEST="range/authorized-test.json" \
+  RANGESPEC_INPUT_EXECUTION_READY="true" \
+  RANGESPEC_INPUT_AT="2026-10-08T20:00:00Z" \
+    ./scripts/github-action.sh >"$action_log"
+
+  actual="$(sed -n 's/^fingerprint=//p' "$action_output")"
+  [[ "$actual" == "$expected" ]] || return 1
+  rg -Fq "VALID execution-ready" "$action_log" || return 1
+  rg -Fq "RANGESPEC_FINGERPRINT: $expected" "$action_log" || return 1
+
+  escape_workspace="$build_directory/escape-workspace"
+  escape_log="$build_directory/escape-log"
+  mkdir -p "$escape_workspace"
+  ln -s "$project_root/examples/gateway-valid.json" "$escape_workspace/outside.json"
+  if GITHUB_ACTION_PATH="$project_root" \
+    GITHUB_WORKSPACE="$escape_workspace" \
+    GITHUB_OUTPUT="$action_output" \
+    RANGESPEC_INPUT_MANIFEST="outside.json" \
+    RANGESPEC_INPUT_EXECUTION_READY="false" \
+    RANGESPEC_INPUT_AT="" \
+      ./scripts/github-action.sh >"$escape_log" 2>&1; then
+    return 1
+  fi
+  rg -Fq "must remain inside" "$escape_log"
+}
+
+verify_action_metadata() {
+  bash -n scripts/github-action.sh || return 1
+  rg -Fq "using: composite" action.yml || return 1
+  rg -Fq "permissions:" examples/workflows/rangespec.yml || return 1
+  rg -Fq "contents: read" examples/workflows/rangespec.yml
+}
+
 verify_built_package() {
   local wheel virtual_environment
   wheel="$(find "$build_directory" -maxdepth 1 -name '*.whl' -print -quit)"
@@ -54,6 +99,8 @@ trap cleanup EXIT
 run_check "package build" uv build --out-dir "$build_directory"
 run_check "installed wheel" verify_built_package
 run_check "stable example fingerprint" verify_fingerprint
+run_check "GitHub Action metadata" verify_action_metadata
+run_check "GitHub Action entrypoint" verify_github_action
 
 run_check \
   "execution-ready example" \

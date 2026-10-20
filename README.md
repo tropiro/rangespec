@@ -12,6 +12,36 @@ RangeSpec is an early Tropiro open-source project. It does not authorize work by
 itself, execute tests, scan networks, exploit targets, or replace contracts and
 human approval.
 
+## GitHub Action
+
+A repository can make RangeSpec validation a required check before a lab or
+security-testing workflow runs:
+
+```yaml
+- name: Validate declared scope
+  id: rangespec
+  uses: tropiro/rangespec@v0.2.0
+  with:
+    manifest: range/authorized-test.json
+    execution-ready: "true"
+```
+
+The action returns the canonical manifest fingerprint as
+`steps.rangespec.outputs.fingerprint`. The manifest path must stay inside the
+checked-out repository. Validation is local and deterministic: the action does
+not execute tests against a target, contact Claude, or read an API key.
+
+For time-window checks that must be reproducible, pass an explicit timestamp:
+
+```yaml
+with:
+  manifest: range/authorized-test.json
+  execution-ready: "true"
+  at: "2026-10-08T20:00:00Z"
+```
+
+See the [complete example workflow](examples/workflows/rangespec.yml).
+
 ## Demonstrated workflow
 
 From this directory:
@@ -76,5 +106,8 @@ Read [THREAT_MODEL.md](THREAT_MODEL.md) before building an integration.
 `./scripts/check.sh` installs the locked development environment and runs lock
 verification, formatting checks, lint, strict type checking, tests, a package
 build, and the deterministic example workflow.
+
+The gate also exercises the GitHub Action entrypoint with the documented
+execution-ready example and verifies that its output fingerprint is stable.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) and [SECURITY.md](SECURITY.md).
