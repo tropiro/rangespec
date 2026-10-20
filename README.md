@@ -42,6 +42,15 @@ with:
 
 See the [complete example workflow](examples/workflows/rangespec.yml).
 
+## Install from PyPI
+
+RangeSpec is published as [`tropiro-rangespec`](https://pypi.org/project/tropiro-rangespec/):
+
+```bash
+python -m pip install tropiro-rangespec
+rangespec --version
+```
+
 ## Demonstrated workflow
 
 From this directory:
